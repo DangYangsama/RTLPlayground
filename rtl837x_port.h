@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "rtl837x_regs.h"
 
+#define STAT_COUNTER_RX_OCTETS	0
+#define STAT_COUNTER_TX_OCTETS	1
 #define STAT_COUNTER_TX_PKTS	46
 #define STAT_COUNTER_RX_PKTS	47
 #define STAT_COUNTER_ERR_PKTS	48

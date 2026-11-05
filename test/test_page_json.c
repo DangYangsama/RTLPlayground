@@ -208,11 +208,15 @@ static void t_status_counters(void)
 	hw_reset(); out_reset();
 	hw_counter_set(0, STAT_COUNTER_TX_PKTS, 0x100000005ULL);
 	hw_counter_set(0, STAT_COUNTER_RX_PKTS, 0x00000000000000ffULL);
+	hw_counter_set(0, STAT_COUNTER_TX_OCTETS, 0x0000000abcdefULL);
+	hw_counter_set(0, STAT_COUNTER_RX_OCTETS, 0x00000000000123ULL);
 	hw_counter_set(1, STAT_COUNTER_TX_PKTS, 0x00000001ffffffffULL);
 	send_status();
 	CHECK(has("\"txG\":\"0x100000005\""), "a counter past 2^32 keeps the zeros of its low word");
 	CHECK(has("\"rxG\":\"0xff\""), "a small counter stays short");
 	CHECK(has("\"txG\":\"0x1ffffffff\""), "a low word of all ones");
+	CHECK(has("\"txO\":\"0xabcdef\""), "the transmit octet counter is reported");
+	CHECK(has("\"rxO\":\"0x123\""), "the receive octet counter is reported");
 	out_reset();
 	send_counters(1);
 	CHECK(has("\"0x100000005\"") && has("\"0x0\""), "/counters.json prints them the same way");

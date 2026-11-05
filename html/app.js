@@ -54,9 +54,9 @@ var LANG = {
         c_no: "no",
         d_system: "System",
         d_traffic: "Traffic",
-        d_traffic_h: "packets/s, live",
-        d_txpps: "TX pps",
-        d_rxpps: "RX pps",
+        d_traffic_h: "bandwidth, live",
+        d_txpps: "TX bandwidth",
+        d_rxpps: "RX bandwidth",
         d_txbad: "TX bad",
         d_rxbad: "RX bad",
         i_host: "Hostname",
@@ -436,9 +436,9 @@ var LANG = {
         c_no: "いいえ",
         d_system: "システム",
         d_traffic: "トラフィック",
-        d_traffic_h: "パケット/秒、リアルタイム",
-        d_txpps: "TX pps",
-        d_rxpps: "RX pps",
+        d_traffic_h: "帯域、リアルタイム",
+        d_txpps: "TX 帯域",
+        d_rxpps: "RX 帯域",
         d_txbad: "TX 異常",
         d_rxbad: "RX 異常",
         i_host: "ホスト名",
@@ -743,9 +743,9 @@ var LANG = {
         c_no: "否",
         d_system: "系统",
         d_traffic: "流量",
-        d_traffic_h: "包/秒，实时",
-        d_txpps: "TX pps",
-        d_rxpps: "RX pps",
+        d_traffic_h: "带宽，实时",
+        d_txpps: "TX 带宽",
+        d_rxpps: "RX 带宽",
         d_txbad: "TX 错误",
         d_rxbad: "RX 错误",
         i_host: "主机名",
@@ -1124,9 +1124,9 @@ var LANG = {
         c_no: "no",
         d_system: "Sistema",
         d_traffic: "Tráfico",
-        d_traffic_h: "paquetes/s, en vivo",
-        d_txpps: "TX pps",
-        d_rxpps: "RX pps",
+        d_traffic_h: "ancho de banda, en vivo",
+        d_txpps: "Ancho de banda TX",
+        d_rxpps: "Ancho de banda RX",
         d_txbad: "TX erróneos",
         d_rxbad: "RX erróneos",
         i_host: "Nombre de host",
@@ -1510,9 +1510,9 @@ var LANG = {
         c_no: "non",
         d_system: "Système",
         d_traffic: "Trafic",
-        d_traffic_h: "paquets/s (en direct)",
-        d_txpps: "TX pps",
-        d_rxpps: "RX pps",
+        d_traffic_h: "débit, en direct",
+        d_txpps: "Débit TX",
+        d_rxpps: "Débit RX",
         d_txbad: "TX KO",
         d_rxbad: "RX KO",
         i_host: "Nom d'hote",
@@ -1857,9 +1857,9 @@ var LANG = {
         c_no: "nein",
         d_system: "System",
         d_traffic: "Datenverkehr",
-        d_traffic_h: "Pakete/s, live",
-        d_txpps: "TX Pakete/s",
-        d_rxpps: "RX Pakete/s",
+        d_traffic_h: "Bandbreite, live",
+        d_txpps: "TX-Bandbreite",
+        d_rxpps: "RX-Bandbreite",
         d_txbad: "TX fehlerhaft",
         d_rxbad: "RX fehlerhaft",
         i_host: "Hostname",
@@ -2671,8 +2671,8 @@ function pollStatus() {
             if (dt > 0.2) s.forEach(function(p, i) {
                 var q = S.prev[i];
                 if (q) S.rates[p.portNum - 1] = {
-                    tx: Number(BigInt(p.txG) - BigInt(q.txG)) / dt,
-                    rx: Number(BigInt(p.rxG) - BigInt(q.rxG)) / dt,
+                    tx: Number(BigInt(p.txO) - BigInt(q.txO)) / dt,
+                    rx: Number(BigInt(p.rxO) - BigInt(q.rxO)) / dt,
                 };
             });
         }
@@ -2691,11 +2691,17 @@ function needPorts(fn) {
     pollStatus().then(fn).catch(function() {});
 }
 
-function fmtPps(v) {
-    if (v == null) return "-";
-    if (v >= 1e6) return (v / 1e6).toFixed(1) + " M";
-    if (v >= 1e3) return (v / 1e3).toFixed(1) + " k";
-    return Math.round(v);
+function fmtRate(v) {
+    if (v == null || isNaN(v)) return "-";
+    var units = ["KB/s", "MB/s", "GB/s"];
+    var u = 0;
+    v /= 1024;
+    while (v >= 1024 && u < units.length - 1) {
+        v /= 1024;
+        u++;
+    }
+    var d = v >= 100 ? 0 : v >= 10 ? 1 : 2;
+    return v.toFixed(d) + " " + units[u];
 }
 
 function portLabel(p) {
@@ -2932,8 +2938,8 @@ function dashStatus() {
         var rt = S.rates[p.portNum - 1];
         r.cells[0].textContent = portLabel(p);
         r.cells[1].innerHTML = linkBadge(p);
-        r.cells[2].textContent = rt ? fmtPps(rt.tx) : "-";
-        r.cells[3].textContent = rt ? fmtPps(rt.rx) : "-";
+        r.cells[2].textContent = rt ? fmtRate(rt.tx) : "-";
+        r.cells[3].textContent = rt ? fmtRate(rt.rx) : "-";
         r.cells[4].textContent = BigInt(p.txB).toString();
         r.cells[5].textContent = BigInt(p.rxB).toString();
     });

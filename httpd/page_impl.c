@@ -939,6 +939,14 @@ void send_status(void)
 		STAT_GET(STAT_COUNTER_ERR_PKTS, i);
 		reg_to_html(RTL837X_STAT_V_HIGH);	// 32bit RX packet errors
 
+		slen += strtox(outbuf + slen, "\",\"txO\":\"0x");
+		STAT_GET(STAT_COUNTER_TX_OCTETS, i);
+		counter_to_html();
+
+		slen += strtox(outbuf + slen, "\",\"rxO\":\"0x");
+		STAT_GET(STAT_COUNTER_RX_OCTETS, i);
+		counter_to_html();
+
 		slen += strtox(outbuf + slen, "\",\"macs\":\"0x");
 		reg_to_html(RTL837X_L2_LRN_PORT_CONSTRT_CNT + (i << 2));
 		slen += strtox(outbuf + slen, "\"}");

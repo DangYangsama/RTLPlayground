@@ -60,6 +60,8 @@ tx_g = [0] * PORTS
 rx_g = [0] * PORTS
 tx_b = [0] * PORTS
 rx_b = [0] * PORTS
+tx_o = [0] * PORTS
+rx_o = [0] * PORTS
 last_called = int(time.time())
 
 sessions = set()
@@ -419,6 +421,8 @@ class Handler(SimpleHTTPRequestHandler):
                 rx_g[n] += rate * elapsed
                 tx_b[n] += rate * elapsed // 10_000_000
                 rx_b[n] += rate * elapsed // 10_000_000
+                tx_o[n] += rate * elapsed // 8
+                rx_o[n] += rate * elapsed // 8
             item = {
                 "portNum": i,
                 "logPort": machine_config["phys_to_log_port"][n],
@@ -428,8 +432,10 @@ class Handler(SimpleHTTPRequestHandler):
                 "link": (5 if i == 1 else 2) if i % 2 else 0,
                 "txG": f"0x{tx_g[n]:016x}",
                 "txB": f"0x{tx_b[n]:016x}",
+                "txO": f"0x{tx_o[n]:016x}",
                 "rxG": f"0x{rx_g[n]:016x}",
                 "rxB": f"0x{rx_b[n]:016x}",
+                "rxO": f"0x{rx_o[n]:016x}",
             }
 
             if machine_config["is_sfp"][i]:

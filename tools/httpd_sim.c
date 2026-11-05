@@ -54,8 +54,8 @@ const struct l2_entry l2_entries[12] = {
 time_t last_called;
 time_t last_session_use;
 
-uint64_t txG[PORTS], txB[PORTS], rxG[PORTS], rxB[PORTS];
-char txG_buff[20], txB_buff[20], rxG_buff[20], rxB_buff[20], counter_buf[20], counter_name[20];
+uint64_t txG[PORTS], txB[PORTS], txO[PORTS], rxG[PORTS], rxB[PORTS], rxO[PORTS];
+char txG_buff[20], txB_buff[20], txO_buff[20], rxG_buff[20], rxB_buff[20], rxO_buff[20], counter_buf[20], counter_name[20];
 char macs_buff[8];
 char sfp_temp[8], sfp_vcc[8], sfp_txbias[8], sfp_txpower[8], sfp_rxpower[8], sfp_laser[8], sfp_options[6];
 char num_buff[20];
@@ -172,15 +172,21 @@ void send_status(int s)
 			rxG[i-1] += rate * (now - last_called);
 			txB[i-1] += rate * (now - last_called) / 10000000;
 			rxB[i-1] += rate * (now - last_called) / 10000000;
+			txO[i-1] += rate * (now - last_called) / 8;
+			rxO[i-1] += rate * (now - last_called) / 8;
 		}
 		sprintf(txG_buff, "0x%016lx", txG[i-1]);
 		sprintf(txB_buff, "0x%016lx", txB[i-1]);
+		sprintf(txO_buff, "0x%016lx", txO[i-1]);
 		sprintf(rxG_buff, "0x%016lx", rxG[i-1]);
 		sprintf(rxB_buff, "0x%016lx", rxB[i-1]);
+		sprintf(rxO_buff, "0x%016lx", rxO[i-1]);
 		json_object_object_add(v, "txG", json_object_new_string(txG_buff));
 		json_object_object_add(v, "txB", json_object_new_string(txB_buff));
+		json_object_object_add(v, "txO", json_object_new_string(txO_buff));
 		json_object_object_add(v, "rxG", json_object_new_string(rxG_buff));
 		json_object_object_add(v, "rxB", json_object_new_string(rxB_buff));
+		json_object_object_add(v, "rxO", json_object_new_string(rxO_buff));
 		uint16_t macs = 0;
 		for (int e = 0; e < L2_ENTRY_NUM; e++)
 			if (l2_entries[e].port == physToLogPort[i-1] && l2_entries[e].type != 's')
@@ -653,7 +659,7 @@ void launch(struct Server *server)
 
     last_called = time(NULL);
     for (int i=0; i < PORTS; i++)
-	    txG[i] = txB[i] = rxG[i] = rxB[i] = 0;
+	    txG[i] = txB[i] = txO[i] = rxG[i] = rxB[i] = rxO[i] = 0;
 
 	while (1) {
 		printf("=== Waiting for connection on port %d === \n", server->port);
