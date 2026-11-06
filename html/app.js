@@ -2704,6 +2704,22 @@ function fmtRate(v) {
     return v.toFixed(d) + " " + units[u];
 }
 
+function fmtBytes(v) {
+    if (v == null) return "-";
+    var n = Number(BigInt(v));
+    if (!isFinite(n) || n < 0) return "-";
+    if (n < 1024) return Math.round(n) + " B";
+    var units = ["KB", "MB", "GB", "TB"];
+    var u = 0;
+    n /= 1024;
+    while (n >= 1024 && u < units.length - 1) {
+        n /= 1024;
+        u++;
+    }
+    var d = n >= 100 ? 0 : n >= 10 ? 1 : 2;
+    return n.toFixed(d) + " " + units[u];
+}
+
 function portLabel(p) {
     return p.name ? p.portNum + " " + p.name : String(p.portNum)
 }
@@ -2821,9 +2837,9 @@ function portRows(p) {
     ];
     if (p.name) rows.push([t("c_name"), p.name]);
     rows.push([t("p_state"), !p.enabled ? t("p_disabled") : (p.link > 0 ? t("p_up") + " " + LINKS[p.link] : t("c_down"))]);
-    rows.push([t("st_txg"), BigInt(p.txG) + " " + t("p_pkts")]);
+    rows.push([t("st_txg"), fmtBytes(p.txO)]);
     rows.push([t("st_txb"), BigInt(p.txB) + " " + t("p_pkts")]);
-    rows.push([t("st_rxg"), BigInt(p.rxG) + " " + t("p_pkts")]);
+    rows.push([t("st_rxg"), fmtBytes(p.rxO)]);
     rows.push([t("st_rxb"), BigInt(p.rxB) + " " + t("p_pkts")]);
     if (p.isSFP) {
         if (p.sfp_vendor) rows.push([t("p_module"), [p.sfp_vendor, p.sfp_model, p.sfp_serial].filter(Boolean).join(" / ")]);
@@ -3578,9 +3594,9 @@ function statsStatus() {
         r.cells[0].textContent = p.portNum;
         r.cells[1].textContent = p.name || "";
         r.cells[2].innerHTML = linkBadge(p);
-        r.cells[3].textContent = BigInt(p.txG).toString();
+        r.cells[3].textContent = fmtBytes(p.txO);
         r.cells[4].textContent = BigInt(p.txB).toString();
-        r.cells[5].textContent = BigInt(p.rxG).toString();
+        r.cells[5].textContent = fmtBytes(p.rxO);
         r.cells[6].textContent = BigInt(p.rxB).toString();
     });
 }
